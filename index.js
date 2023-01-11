@@ -1,9 +1,30 @@
+const { SpellManager } = require("./magickml-core");
+const { buildMagickInterface } = require ("./buildMagickInterface");
+import json from './main.spell.json'
+
+const spellManager = new SpellManager({
+    magickInterface: buildMagickInterface({}),
+    cache: false,
+  })
+
+const spell = JSON.parse(json)
+
+if(!spell) {
+    throw new Error(`No spell found at ${process.env.ROOT_SPELL}`)
+}
+
 async function handleRequest(request) {
     if (request.method === 'OPTIONS') {
         return handleOptions(request);
     } else {
         return handleFetch(request);
     }
+}
+
+async function handleResponse(data){
+    const spellRunner = await spellManager.load(rootSpell)
+    const spellOutputs = await spellRunner.defaultRun(data.inputs)
+    return spellOutputs;
 }
 
 async function handleFetch(request) {
@@ -14,35 +35,8 @@ async function handleFetch(request) {
     }
 
     const data = await request.json();
-    let prompt = data.inputs.personality;
-    let finalPrompt = prompt
-        .replaceAll('#speaker', data.inputs.Speaker)
-        .replaceAll('#input', data.inputs.Input)
-        .replaceAll('#agent', data.inputs.Agent)
-        .replaceAll('#conversation', data.inputs.Conversation)
-        .replaceAll('undefined\n','' ).replaceAll('undefined','')
-        .slice(-5000)
 
-    const token = authorization.split(' ')[1];
-    const postData = {
-        prompt: finalPrompt	,
-        max_tokens: 500,
-        stop : ["###"],
-    };
-
-    // Make the first request to the Davinci model
-    const davinciResponse = await fetch('https://api.openai.com/v1/engines/text-davinci-003/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(postData)
-    });
-
-    // Process the response from the Davinci model
-    const davinciData = await davinciResponse.json();
-    console.log(davinciData);
+    const response = await handleResponse(data);
 
     // Return the results to the client
     const headers = {
@@ -51,7 +45,7 @@ async function handleFetch(request) {
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization'
     };
-    return new Response(JSON.stringify({ davinciData }), {
+    return new Response(JSON.stringify({ response }), {
         headers
     });
 }

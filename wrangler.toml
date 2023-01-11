@@ -1,8 +1,6 @@
-name = "alchemy-worker"
+name = "magick-worker"
 type = "webpack"
-route = ''
-zone_id = ''
-usage_model = ''
+usage_model = 'bundled'
 compatibility_flags = []
 workers_dev = true
 compatibility_date = "2023-01-10"

@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/xpportal/light-alchemy/issues"
   },
-  "homepage": "https://github.com/xpportal/light-alchemy#readme"
+  "homepage": "https://github.com/xpportal/light-alchemy#readme",
+  "dependencies": {
+    "magickml-core": "^0.0.2"
+  }
 }
